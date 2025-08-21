@@ -2432,8 +2432,3 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
-loadstring(
-    game:HttpGet(
-        'https://raw.githubusercontent.com/ewafawfesasegeswge-a11y/Esp/main/ESP.lua'
-    )
-)()
