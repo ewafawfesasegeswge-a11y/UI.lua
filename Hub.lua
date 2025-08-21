@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 
 -- Make a window
 local Window = Library:CreateWindow({
-    Title = 'Zenith Autofarm Hub',
+    Title = 'Zenith Autofarm Hub V25',
     Footer = 'Obsidian UI',
     Icon = 95816097006870,
     ShowCustomCursor = true,
@@ -2131,5 +2131,6 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
