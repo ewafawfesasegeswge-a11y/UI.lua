@@ -610,20 +610,7 @@ local function flingPlayer(target, duration)
     bv:Destroy()
 end
 
--- Dropdown
-local PlayerDropdown
-local function refreshPlayers()
-    if not PlayerDropdown then
-        return
-    end
-    local names = {}
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(names, plr.Name)
-        end
-    end
-    PlayerDropdown:SetValues(names)
-end
+
 
         print('Selected player:', val)
     end,
@@ -2233,6 +2220,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
