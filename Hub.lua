@@ -439,7 +439,11 @@ local PlayerDropdown = PlayerBox:AddDropdown('PlayerDropdown', {
     Multi = false,
     Text = 'Select Player',
     Callback = function(val)
-   
+        print('Selected player:', val)
+    end,
+})
+
+            
 -- Refresh dropdown values
 local function refreshPlayers()
     local names = {}
@@ -2246,6 +2250,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
