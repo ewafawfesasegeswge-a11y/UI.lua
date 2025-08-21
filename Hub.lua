@@ -428,6 +428,32 @@ local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
 -------------------------------------------------
 -- UI Dropdown for player selection
 -------------------------------------------------
+local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
+
+-------------------------------------------------
+-- UI Dropdown for player selection (only one!)
+-------------------------------------------------
+local PlayerDropdown = PlayerBox:AddDropdown('PlayerDropdown', {
+    Values = {},
+    Default = nil,
+    Multi = false,
+    Text = 'Select Player',
+    Callback = function(val)
+   
+-- Refresh dropdown values
+local function refreshPlayers()
+    local names = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(names, plr.Name)
+        end
+    end
+    PlayerDropdown:SetValues(names)
+end
+
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+refreshPlayers()
 
 
 ------------------------------------------------------
@@ -2220,6 +2246,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
