@@ -415,6 +415,7 @@ FarmBox:AddToggle('AutoSkillToggle', {
     end,
 })
 
+
 -------------------------------
 -- Player Tab
 ------------------------------------------------------
@@ -429,6 +430,7 @@ local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
 -- UI Dropdown for player selection
 -------------------------------------------------
 
+-- FIXED: Single PlayerDropdown below
 local PlayerDropdown = PlayerBox:AddDropdown('Select Player', {
     Values = {},
     Default = '',
@@ -731,12 +733,16 @@ if game.PlaceId == allowedGameId then
 end
 
 -- Fling function (Infinite Yield style)
-local function flingPlayer(target, duration)
-    local char = LocalPlayer.Character
-    local targetChar = target.Character
-    if not (char and targetChar) then
-        return
-    end
+local function flingPlayer(target)
+    if not (target and target.Character) then return end
+    local root = target.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(1e5, 1e5, 1e5)
+    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+    bv.Parent = root
+    game:GetService("Debris"):AddItem(bv, 0.2)
+end
 
     local root = char:FindFirstChild('HumanoidRootPart')
     local targetRoot = targetChar:FindFirstChild('HumanoidRootPart')
@@ -864,10 +870,8 @@ PlayerBox:AddToggle('ContinuousFling', {
             task.spawn(function()
                 while Toggles.ContinuousFling.Value do
                     local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if target then
-                        flingPlayer(target, 0.5)
-                    end
-                    task.wait(0.5)
+                    if target then flingPlayer(target) end
+                    task.wait(0.1)
                 end
             end)
         end
@@ -882,17 +886,10 @@ PlayerBox:AddToggle('ContinuousTP', {
             task.spawn(function()
                 while Toggles.ContinuousTP.Value do
                     local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if
-                        target
-                        and target.Character
-                        and target.Character:FindFirstChild('HumanoidRootPart')
-                    then
-                        LocalPlayer.Character:PivotTo(
-                            target.Character.HumanoidRootPart.CFrame
-                                * CFrame.new(0, 0, 3)
-                        )
+                    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                        LocalPlayer.Character:PivotTo(target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3))
                     end
-                    task.wait(0.2)
+                    task.wait(0.05)
                 end
             end)
         end
@@ -933,6 +930,7 @@ AutoBox:AddToggle('AntiAFK', {
         end
     end,
 })
+
 
 
 local player = game.Players.LocalPlayer
@@ -2411,4 +2409,5 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
