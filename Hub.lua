@@ -415,8 +415,7 @@ FarmBox:AddToggle('AutoSkillToggle', {
     end,
 })
 
-
--------------------------------
+------------------------------------------------------
 -- Player Tab
 ------------------------------------------------------
 local PlayerTab = Window:AddTab({
@@ -426,167 +425,27 @@ local PlayerTab = Window:AddTab({
 })
 
 local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
+local AutoBox = PlayerTab:AddRightGroupbox('Auto Features')
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local RunService = game:GetService("RunService")
+
 -------------------------------------------------
--- UI Dropdown for player selection
+-- Single Dropdown for selecting player
 -------------------------------------------------
-
-local PlayerDropdown = )
-
-------------------------------------------------------
--- Game-specific Features (Players Tab / AutoBox)
-------------------------------------------------------
-
--- Allowed game (replace with your real PlaceId)
-local allowedGameId = 1234567890
-
-if game.PlaceId == allowedGameId then
-    ------------------------------
-    -- Qi Zone Autofarm
-    ------------------------------
-    local ZoneRemote =
-        ReplicatedStorage.RemoteEvents.Player.Cultivation:WaitForChild(
-            'ZoneEvent'
-        )
-
-    local qiZones = { 'Statue', 'YSW', 'BloodCC', 'SB', 'FoH' }
-    local selectedQiZone = qiZones[1]
-    local autoQiEnabled = false
-    local currentQiZone = nil
-
-    AutoBox:AddDropdown('QiZoneDropdown', {
-        Values = qiZones,
-        Value = selectedQiZone,
-        Text = 'Select Qi Zone',
-        Callback = function(value)
-            selectedQiZone = value
-            if autoQiEnabled then
-                if currentQiZone then
-                    ZoneRemote:FireServer(LocalPlayer, currentQiZone, 'Exited')
-                end
-                ZoneRemote:FireServer(LocalPlayer, value, 'Entered')
-                currentQiZone = value
-            end
-        end,
-    })
-
-    AutoBox:AddToggle('AutoQiZoneToggle', {
-        Text = 'Enable Auto Qi Zone',
-        Default = false,
-        Callback = function(state)
-            autoQiEnabled = state
-            if state then
-                if selectedQiZone then
-                    ZoneRemote:FireServer(
-                        LocalPlayer,
-                        selectedQiZone,
-                        'Entered'
-                    )
-                    currentQiZone = selectedQiZone
-                end
-            else
-                if currentQiZone then
-                    ZoneRemote:FireServer(LocalPlayer, currentQiZone, 'Exited')
-                    currentQiZone = nil
-                end
-            end
-        end,
-    })
-
-    ------------------------------
-    -- Comprehension Zone Autofarm
-    ------------------------------
-    local CompRemote =
-        ReplicatedStorage.RemoteEvents.Player.Comprehension:WaitForChild(
-            'ComprehensionZone'
-        )
-
-    local compZones = { 'EL', 'HVP' } -- can add more later
-    local selectedCompZone = compZones[1]
-    local autoCompEnabled = false
-    local currentCompZone = nil
-
-    AutoBox:AddDropdown('CompZoneDropdown', {
-        Values = compZones,
-        Value = selectedCompZone,
-        Text = 'Select Comprehension Zone',
-        Callback = function(value)
-            selectedCompZone = value
-            if autoCompEnabled then
-                if currentCompZone then
-                    CompRemote:FireServer(
-                        LocalPlayer,
-                        currentCompZone,
-                        'Exited'
-                    )
-                end
-                CompRemote:FireServer(LocalPlayer, value, 'Entered')
-                currentCompZone = value
-            end
-        end,
-    })
-
-    AutoBox:AddToggle('AutoCompZoneToggle', {
-        Text = 'Enable Auto Comprehension Zone',
-        Default = false,
-        Callback = function(state)
-            autoCompEnabled = state
-            if state then
-                if selectedCompZone then
-                    CompRemote:FireServer(
-                        LocalPlayer,
-                        selectedCompZone,
-                        'Entered'
-                    )
-                    currentCompZone = selectedCompZone
-                end
-            else
-                if currentCompZone then
-                    CompRemote:FireServer(
-                        LocalPlayer,
-                        currentCompZone,
-                        'Exited'
-                    )
-                    currentCompZone = nil
-                end
-            end
-        end,
-    })
-end
-
--- Fling function (Infinite Yield style)
-local function flingPlayer(target, duration)
-    local char = LocalPlayer.Character
-    local targetChar = target.Character
-    if not (char and targetChar) then
-        return
+local PlayerDropdown = PlayerBox:AddDropdown("PlayerDropdown", {
+    Values = {},
+    Default = nil,
+    Multi = false,
+    Text = "Select Player",
+    Callback = function(val)
+        print("Selected player:", val)
     end
+})
 
-    local root = char:FindFirstChild('HumanoidRootPart')
-    local targetRoot = targetChar:FindFirstChild('HumanoidRootPart')
-    if not (root and targetRoot) then
-        return
-    end
-
-    -- Add BodyThrust to fling
-    local bv = Instance.new('BodyThrust')
-    bv.Force = Vector3.new(9999, 9999, 9999)
-    bv.Parent = root
-
-    local startTime = tick()
-    while tick() - startTime < (duration or 0.5) do
-        root.CFrame = targetRoot.CFrame
-        task.wait()
-    end
-
-    bv:Destroy()
-end
-
--- Dropdown
-local PlayerDropdown
+-- Refresh dropdown values
 local function refreshPlayers()
-    if not PlayerDropdown then
-        return
-    end
     local names = {}
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer then
@@ -595,132 +454,104 @@ local function refreshPlayers()
     end
     PlayerDropdown:SetValues(names)
 end
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+refreshPlayers()
 
-        print('Selected player:', val)
-    end,
+-------------------------------------------------
+-- TP Button (one-time)
+-------------------------------------------------
+PlayerBox:AddButton("TP to Person", function()
+    local target = Players:FindFirstChild(PlayerDropdown.Value)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character:PivotTo(target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3))
+    end
+end)
+
+-------------------------------------------------
+-- Continuous TP Toggle
+-------------------------------------------------
+local tpConn
+PlayerBox:AddToggle("ContinuousTP", {
+    Text = "Continuous TP to Selected",
+    Default = false,
+    Callback = function(state)
+        if state then
+            tpConn = RunService.Heartbeat:Connect(function()
+                local target = Players:FindFirstChild(PlayerDropdown.Value)
+                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character:PivotTo(target.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,3))
+                end
+            end)
+        else
+            if tpConn then tpConn:Disconnect() tpConn = nil end
+        end
+    end
 })
 
+-------------------------------------------------
+-- Fling function
+-------------------------------------------------
+local function flingPlayer(target)
+    if not (target and target.Character and target.Character:FindFirstChild("HumanoidRootPart")) then return end
+    if not (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")) then return end
 
--- Fling function (Infinite Yield style)
-local function flingPlayer(target, duration)
-    local char = LocalPlayer.Character
-    local targetChar = target.Character
-    if not (char and targetChar) then
-        return
-    end
+    local root = LocalPlayer.Character.HumanoidRootPart
+    local targetRoot = target.Character.HumanoidRootPart
 
-    local root = char:FindFirstChild('HumanoidRootPart')
-    local targetRoot = targetChar:FindFirstChild('HumanoidRootPart')
-    if not (root and targetRoot) then
-        return
-    end
-
-    -- Add BodyThrust to fling
-    local bv = Instance.new('BodyThrust')
-    bv.Force = Vector3.new(9999, 9999, 9999)
+    -- Create strong velocity
+    local bv = Instance.new("BodyVelocity")
+    bv.Velocity = Vector3.new(9999, 9999, 9999)
+    bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
     bv.Parent = root
 
-    local startTime = tick()
-    while tick() - startTime < (duration or 0.5) do
-        root.CFrame = targetRoot.CFrame
-        task.wait()
-    end
-
+    root.CFrame = targetRoot.CFrame
+    task.wait(0.1)
     bv:Destroy()
 end
 
--- Dropdown
-local PlayerDropdown
-local function refreshPlayers()
-    if not PlayerDropdown then
-        return
-    end
-    local names = {}
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            table.insert(names, plr.Name)
-        end
-    end
-    PlayerDropdown:SetValues(names)
-end
-
-        print('Selected player:', val)
-    end,
-})
-
--- Buttons
-PlayerBox:AddButton('TP to Person', function()
-    local target = Players:FindFirstChild(PlayerDropdown.Value)
-    if
-        target
-        and target.Character
-        and target.Character:FindFirstChild('HumanoidRootPart')
-    then
-        LocalPlayer.Character:PivotTo(
-            target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-        )
-    end
-end)
-
-PlayerBox:AddButton('Fling Selected', function()
-    local target = Players:FindFirstChild(PlayerDropdown.Value)
-    if target then
-        flingPlayer(target, 0.5)
-    end
-end)
-
-PlayerBox:AddButton('Fling All', function()
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer then
-            flingPlayer(plr, 0.5)
-            task.wait(0.5)
-        end
-    end
-end)
-
--- Toggles
+-------------------------------------------------
+-- Continuous Fling Toggle
+-------------------------------------------------
 local flingConn
-PlayerBox:AddToggle('ContinuousFling', {
-    Text = 'Continuous Fling Selected',
+PlayerBox:AddToggle("ContinuousFling", {
+    Text = "Continuous Fling Selected",
     Default = false,
     Callback = function(state)
         if state then
             flingConn = RunService.Heartbeat:Connect(function()
                 local target = Players:FindFirstChild(PlayerDropdown.Value)
-                if target then
+                if target and target ~= LocalPlayer then
                     flingPlayer(target)
                 end
             end)
         else
             if flingConn then flingConn:Disconnect() flingConn = nil end
         end
-    end,
+    end
 })
 
-local tpConn
-PlayerBox:AddToggle('ContinuousTP', {
-    Text = 'Continuous TP to Selected',
+-------------------------------------------------
+-- Continuous Fling All Toggle (One Cycle, same as fling selected)
+-------------------------------------------------
+PlayerBox:AddToggle("ContinuousFlingAll", {
+    Text = "Continuous Fling All (One Cycle)",
     Default = false,
     Callback = function(state)
         if state then
-            tpConn = RunService.Heartbeat:Connect(function()
-                local target = Players:FindFirstChild(PlayerDropdown.Value)
-                if target and target.Character and target.Character:FindFirstChild('HumanoidRootPart') then
-                    LocalPlayer.Character:PivotTo(
-                        target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-                    )
+            task.spawn(function()
+                for _, plr in ipairs(Players:GetPlayers()) do
+                    if plr ~= LocalPlayer then
+                        flingPlayer(plr) -- ✅ same fling function as Continuous Fling Selected
+                        task.wait(0.2)
+                    end
                 end
+                -- turn itself off after finishing
+                Toggles.ContinuousFlingAll:SetValue(false)
             end)
-        else
-            if tpConn then tpConn:Disconnect() tpConn = nil end
         end
-    end,
+    end
 })
-
--- Refresh when players join/leave
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
 
 -- toggle in UI
 AutoBox:AddToggle('AntiAFK', {
@@ -751,27 +582,9 @@ AutoBox:AddToggle('AntiAFK', {
         end
     end,
 })
--------------------------------------------------
--- Continuous Fling All Toggle
--------------------------------------------------
-local flingAllConn
-PlayerBox:AddToggle("ContinuousFlingAll", {
-    Text = "Continuous Fling All",
-    Default = false,
-    Callback = function(state)
-        if state then
-            flingAllConn = RunService.Heartbeat:Connect(function()
-                for _, plr in ipairs(Players:GetPlayers()) do
-                    if plr ~= LocalPlayer then
-                        flingPlayer(plr)
-                    end
-                end
-            end)
-        else
-            if flingAllConn then flingAllConn:Disconnect() flingAllConn = nil end
-        end
-    end
-})
+
+
+
 
 
 local player = game.Players.LocalPlayer
@@ -2250,6 +2063,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
