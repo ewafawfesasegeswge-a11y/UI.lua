@@ -429,16 +429,13 @@ local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
 -- UI Dropdown for player selection
 -------------------------------------------------
 
--- Dropdown to select player
-PlayersBox:AddDropdown("SelectedPlayer", {
+local PlayerDropdown = PlayerBox:AddDropdown('Select Player', {
     Values = {},
-    Default = "",
+    Default = '',
     Multi = false,
-    Text = "Select Player",
-    Callback = function(value)
-        selectedPlayer = Players:FindFirstChild(value)
-    end
+    Text = 'Select Player',
 })
+
 
 
 -- Refresh dropdown values
@@ -2437,5 +2434,6 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
