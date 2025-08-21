@@ -590,22 +590,9 @@ PlayerBox:AddButton('Fling All', function()
     end
 end)
 
-PlayerBox:AddToggle('ContinuousFling', {
-    Text = 'Continuous Fling Selected',
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Toggles.ContinuousFling.Value do
-                    local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if target then flingPlayer(target, 0.5) end
-                    task.wait(0.5)
-                end
-            end)
-        end
-    end,
-})
-
+------------------------------------------------------
+-- Continuous TP
+------------------------------------------------------
 PlayerBox:AddToggle('ContinuousTP', {
     Text = 'Continuous TP to Selected',
     Default = false,
@@ -615,9 +602,31 @@ PlayerBox:AddToggle('ContinuousTP', {
                 while Toggles.ContinuousTP.Value do
                     local target = Players:FindFirstChild(PlayerDropdown.Value)
                     if target and target.Character and target.Character:FindFirstChild('HumanoidRootPart') then
-                        LocalPlayer.Character:PivotTo(target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3))
+                        LocalPlayer.Character:PivotTo(
+                            target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                        )
                     end
                     task.wait(0.2)
+                end
+            end)
+        end
+    end,
+})
+------------------------------------------------------
+-- Continuous Fling
+------------------------------------------------------
+PlayerBox:AddToggle('ContinuousFling', {
+    Text = 'Continuous Fling Selected',
+    Default = false,
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                while Toggles.ContinuousFling.Value do
+                    local target = Players:FindFirstChild(PlayerDropdown.Value)
+                    if target then
+                        flingPlayer(target, 0.2)
+                    end
+                    task.wait(0.3)
                 end
             end)
         end
@@ -2122,4 +2131,5 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
