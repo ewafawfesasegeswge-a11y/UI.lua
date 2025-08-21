@@ -592,49 +592,7 @@ end)
 
 local RunService = game:GetService("RunService")
 
-------------------------------------------------------
--- Continuous TP
-------------------------------------------------------
-PlayerBox:AddToggle('ContinuousTP', {
-    Text = 'Continuous TP to Selected',
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Toggles.ContinuousTP.Value do
-                    local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
-                        LocalPlayer.Character:PivotTo(
-                            target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-                        )
-                    end
-                    task.wait(0.01) -- every 0.01s
-                end
-            end)
-        end
-    end
-})
 
-------------------------------------------------------
--- Continuous Fling
-------------------------------------------------------
-PlayerBox:AddToggle('ContinuousFling', {
-    Text = 'Continuous Fling Selected',
-    Default = false,
-    Callback = function(state)
-        if state then
-            task.spawn(function()
-                while Toggles.ContinuousFling.Value do
-                    local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if target then
-                        flingPlayer(target, 0.1) -- short burst fling
-                    end
-                    task.wait(0.01) -- every 0.01s
-                end
-            end)
-        end
-    end
-})
 
 
 ------------------------------------------------------
@@ -2135,6 +2093,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
