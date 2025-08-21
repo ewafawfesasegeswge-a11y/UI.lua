@@ -429,7 +429,6 @@ local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
 -- UI Dropdown for player selection
 -------------------------------------------------
 
-local PlayerDropdown = )
 
 ------------------------------------------------------
 -- Game-specific Features (Players Tab / AutoBox)
@@ -2251,5 +2250,6 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
