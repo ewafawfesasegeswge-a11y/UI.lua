@@ -553,35 +553,6 @@ PlayerBox:AddToggle("ContinuousFlingAll", {
     end
 })
 
--- toggle in UI
-AutoBox:AddToggle('AntiAFK', {
-    Text = 'Anti AFK',
-    Default = false,
-    Callback = function(state)
-        if state then
-            print('Anti AFK Enabled')
-
-            AntiAFKConn = game:GetService('Players').LocalPlayer.Idled
-                :Connect(function()
-                    local vu = game:GetService('VirtualUser')
-                    local cam = workspace.CurrentCamera
-                    if cam then
-                        vu:Button2Down(Vector2.new(0, 0), cam.CFrame)
-                        task.wait(0.1)
-                        vu:Button2Up(Vector2.new(0, 0), cam.CFrame)
-                        print('[Anti AFK] simulated input')
-                    end
-                end)
-        else
-            print('Anti AFK Disabled')
-
-            if AntiAFKConn then
-                AntiAFKConn:Disconnect()
-                AntiAFKConn = nil
-            end
-        end
-    end,
-})
 
 
 
@@ -2063,6 +2034,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
