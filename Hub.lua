@@ -7,7 +7,7 @@ local player = Players.LocalPlayer
 
 -- Make a window
 local Window = Library:CreateWindow({
-    Title = 'Zenith Autofarm Hub V25',
+    Title = 'Zenith Autofarm Hub V11',
     Footer = 'Obsidian UI',
     Icon = 95816097006870,
     ShowCustomCursor = true,
@@ -590,6 +590,8 @@ PlayerBox:AddButton('Fling All', function()
     end
 end)
 
+local RunService = game:GetService("RunService")
+
 ------------------------------------------------------
 -- Continuous TP
 ------------------------------------------------------
@@ -601,17 +603,18 @@ PlayerBox:AddToggle('ContinuousTP', {
             task.spawn(function()
                 while Toggles.ContinuousTP.Value do
                     local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if target and target.Character and target.Character:FindFirstChild('HumanoidRootPart') then
+                    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                         LocalPlayer.Character:PivotTo(
                             target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
                         )
                     end
-                    task.wait(0.2)
+                    task.wait(0.01) -- every 0.01s
                 end
             end)
         end
-    end,
+    end
 })
+
 ------------------------------------------------------
 -- Continuous Fling
 ------------------------------------------------------
@@ -624,14 +627,15 @@ PlayerBox:AddToggle('ContinuousFling', {
                 while Toggles.ContinuousFling.Value do
                     local target = Players:FindFirstChild(PlayerDropdown.Value)
                     if target then
-                        flingPlayer(target, 0.2)
+                        flingPlayer(target, 0.1) -- short burst fling
                     end
-                    task.wait(0.3)
+                    task.wait(0.01) -- every 0.01s
                 end
             end)
         end
-    end,
+    end
 })
+
 
 ------------------------------------------------------
 -- Anti AFK
@@ -2131,6 +2135,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
