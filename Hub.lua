@@ -429,197 +429,11 @@ local PlayerBox = PlayerTab:AddLeftGroupbox('Player Actions')
 -- UI Dropdown for player selection
 -------------------------------------------------
 
-local PlayerDropdown = PlayerBox:AddDropdown('Select Player', {
-    Values = {},
-    Default = '',
-    Multi = false,
-    Text = 'Select Player',
-})
-
--- Refresh dropdown values
-local function refreshPlayers()
-    local names = {}
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= player then
-            table.insert(names, plr.Name)
-        end
-    end
-    PlayerDropdown:SetValues(names)
-end
-
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
-
--- Auto Features
-local AutoBox = PlayerTab:AddRightGroupbox('Auto Features')
-
-local Players = game:GetService('Players')
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local LocalPlayer = Players.LocalPlayer
-
-local RunService = game:GetService('RunService')
-local Players = game:GetService('Players')
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local LocalPlayer = Players.LocalPlayer
-
-local CultivationRemote =
-    ReplicatedStorage.RemoteEvents.Player.Cultivation.CultivationRemote
-
--- store last meditation position
-local savedPos = nil
-local savingPos = false
-local retrying = false
-local retryConnection
-
-local RunService = game:GetService('RunService')
-local Players = game:GetService('Players')
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local LocalPlayer = Players.LocalPlayer
-
-local CultivationRemote = ReplicatedStorage:WaitForChild('RemoteEvents')
-    :WaitForChild('Player')
-    :WaitForChild('Cultivation')
-    :WaitForChild('CultivationRemote')
-
--- state
-local savedPos = nil
-local savingPos = false
-local retryConnection = nil
-local charAddedConn = nil
-
--- helpers
-local function startMeditating()
-    CultivationRemote:FireServer('GSMeditation', 'Start')
-end
-
-local function stopMeditating()
-    CultivationRemote:FireServer('GSMeditation', 'Stop')
-end
-
-local function freezeCharacter(char)
-    local root = char and char:FindFirstChild('HumanoidRootPart')
-    if root then
-        root.Anchored = true
-    end
-end
-
-local function unfreezeCharacter(char)
-    local root = char and char:FindFirstChild('HumanoidRootPart')
-    if root then
-        root.Anchored = false
-    end
-end
-
--- retry teleport loop after respawn
-local function tryReturnToSpot(char)
-    local root = char:WaitForChild('HumanoidRootPart', 10)
-    if not root or not savedPos then
-        return
-    end
-
-    local startTime = tick()
-    if retryConnection then
-        retryConnection:Disconnect()
-    end
-
-    retryConnection = RunService.Heartbeat:Connect(function()
-        if not savingPos then
-            -- toggle disabled -> stop retrying immediately
-            retryConnection:Disconnect()
-            retryConnection = nil
-            return
-        end
-
-        if tick() - startTime > 2 then
-            retryConnection:Disconnect()
-            retryConnection = nil
-            return
-        end
-
-        if savedPos then
-            root.CFrame = savedPos
-            if (root.Position - savedPos.Position).Magnitude < 5 then
-                retryConnection:Disconnect()
-                retryConnection = nil
-
-                startMeditating()
-                task.delay(1, function()
-                    if savingPos then
-                        freezeCharacter(char)
-                    end
-                end)
-
-                print('✅ Returned & resumed meditation')
-            end
-        end
-    end)
-end
-
--- UI toggle
-AutoBox:AddToggle('AutoMeditate', {
-    Text = 'Auto Meditate/Comprehend',
-    Default = false,
-    Callback = function(state)
-        if state then
-            print('Auto Meditate/Comprehend Enabled')
-            startMeditating()
-
-            if LocalPlayer.Character then
-                freezeCharacter(LocalPlayer.Character)
-            end
-
-            savingPos = true
-            task.spawn(function()
-                while savingPos do
-                    local char = LocalPlayer.Character
-                    local root = char
-                        and char:FindFirstChild('HumanoidRootPart')
-                    if root then
-                        savedPos = root.CFrame
-                    end
-                    task.wait(0.1)
-                end
-            end)
-
-            -- listen for respawn
-            if charAddedConn then
-                charAddedConn:Disconnect()
-            end
-            charAddedConn = LocalPlayer.CharacterAdded:Connect(function(char)
-                if savingPos then
-                    tryReturnToSpot(char)
-                end
-            end)
-        else
-            print('Auto Meditate Disabled')
-            savingPos = false
-
-            -- 🔴 cleanup everything
-            if retryConnection then
-                retryConnection:Disconnect()
-                retryConnection = nil
-            end
-            if charAddedConn then
-                charAddedConn:Disconnect()
-                charAddedConn = nil
-            end
-
-            if LocalPlayer.Character then
-                unfreezeCharacter(LocalPlayer.Character)
-            end
-
-            stopMeditating()
-        end
-    end,
-})
+local PlayerDropdown = )
 
 ------------------------------------------------------
 -- Game-specific Features (Players Tab / AutoBox)
 ------------------------------------------------------
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local Players = game:GetService('Players')
-local LocalPlayer = Players.LocalPlayer
 
 -- Allowed game (replace with your real PlaceId)
 local allowedGameId = 1234567890
@@ -781,18 +595,10 @@ local function refreshPlayers()
     PlayerDropdown:SetValues(names)
 end
 
-PlayerDropdown = PlayerBox:AddDropdown('PlayerDropdown', {
-    Values = {},
-    Default = nil,
-    Multi = false,
-    Text = 'Select Player',
-    Callback = function(val)
         print('Selected player:', val)
     end,
 })
 
-local Players = game:GetService('Players')
-local LocalPlayer = Players.LocalPlayer
 
 -- Fling function (Infinite Yield style)
 local function flingPlayer(target, duration)
@@ -837,12 +643,6 @@ local function refreshPlayers()
     PlayerDropdown:SetValues(names)
 end
 
-PlayerDropdown = PlayerBox:AddDropdown('PlayerDropdown', {
-    Values = {},
-    Default = nil,
-    Multi = false,
-    Text = 'Select Player',
-    Callback = function(val)
         print('Selected player:', val)
     end,
 })
@@ -878,45 +678,40 @@ PlayerBox:AddButton('Fling All', function()
 end)
 
 -- Toggles
+local flingConn
 PlayerBox:AddToggle('ContinuousFling', {
     Text = 'Continuous Fling Selected',
     Default = false,
     Callback = function(state)
         if state then
-            task.spawn(function()
-                while Toggles.ContinuousFling.Value do
-                    local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if target then
-                        flingPlayer(target, 0.5)
-                    end
-                    task.wait(0.5)
+            flingConn = RunService.Heartbeat:Connect(function()
+                local target = Players:FindFirstChild(PlayerDropdown.Value)
+                if target then
+                    flingPlayer(target)
                 end
             end)
+        else
+            if flingConn then flingConn:Disconnect() flingConn = nil end
         end
     end,
 })
 
+local tpConn
 PlayerBox:AddToggle('ContinuousTP', {
     Text = 'Continuous TP to Selected',
     Default = false,
     Callback = function(state)
         if state then
-            task.spawn(function()
-                while Toggles.ContinuousTP.Value do
-                    local target = Players:FindFirstChild(PlayerDropdown.Value)
-                    if
-                        target
-                        and target.Character
-                        and target.Character:FindFirstChild('HumanoidRootPart')
-                    then
-                        LocalPlayer.Character:PivotTo(
-                            target.Character.HumanoidRootPart.CFrame
-                                * CFrame.new(0, 0, 3)
-                        )
-                    end
-                    task.wait(0.2)
+            tpConn = RunService.Heartbeat:Connect(function()
+                local target = Players:FindFirstChild(PlayerDropdown.Value)
+                if target and target.Character and target.Character:FindFirstChild('HumanoidRootPart') then
+                    LocalPlayer.Character:PivotTo(
+                        target.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                    )
                 end
             end)
+        else
+            if tpConn then tpConn:Disconnect() tpConn = nil end
         end
     end,
 })
@@ -954,6 +749,30 @@ AutoBox:AddToggle('AntiAFK', {
             end
         end
     end,
+})
+-------------------------------------------------
+
+
+-------------------------------------------------
+-- Continuous Fling All Toggle (One Cycle, same as fling selected)
+-------------------------------------------------
+PlayerBox:AddToggle("ContinuousFlingAll", {
+    Text = "Continuous Fling All (One Cycle)",
+    Default = false,
+    Callback = function(state)
+        if state then
+            task.spawn(function()
+                for _, plr in ipairs(Players:GetPlayers()) do
+                    if plr ~= LocalPlayer then
+                        flingPlayer(plr) -- ✅ same fling function as Continuous Fling Selected
+                        task.wait(0.2)
+                    end
+                end
+                -- turn itself off after finishing
+                Toggles.ContinuousFlingAll:SetValue(false)
+            end)
+        end
+    end
 })
 
 local player = game.Players.LocalPlayer
@@ -2432,4 +2251,5 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
