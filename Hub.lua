@@ -461,9 +461,6 @@ local ReplicatedStorage = game:GetService('ReplicatedStorage')
 local LocalPlayer = Players.LocalPlayer
 
 local RunService = game:GetService('RunService')
-local Players = game:GetService('Players')
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local LocalPlayer = Players.LocalPlayer
 
 local CultivationRemote =
     ReplicatedStorage.RemoteEvents.Player.Cultivation.CultivationRemote
@@ -474,10 +471,6 @@ local savingPos = false
 local retrying = false
 local retryConnection
 
-local RunService = game:GetService('RunService')
-local Players = game:GetService('Players')
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local LocalPlayer = Players.LocalPlayer
 
 local CultivationRemote = ReplicatedStorage:WaitForChild('RemoteEvents')
     :WaitForChild('Player')
@@ -619,9 +612,6 @@ AutoBox:AddToggle('AutoMeditate', {
 ------------------------------------------------------
 -- Game-specific Features (Players Tab / AutoBox)
 ------------------------------------------------------
-local ReplicatedStorage = game:GetService('ReplicatedStorage')
-local Players = game:GetService('Players')
-local LocalPlayer = Players.LocalPlayer
 
 -- Allowed game (replace with your real PlaceId)
 local allowedGameId = 1234567890
@@ -783,18 +773,10 @@ local function refreshPlayers()
     PlayerDropdown:SetValues(names)
 end
 
-PlayerDropdown = PlayerBox:AddDropdown('PlayerDropdown', {
-    Values = {},
-    Default = nil,
-    Multi = false,
-    Text = 'Select Player',
-    Callback = function(val)
         print('Selected player:', val)
     end,
 })
 
-local Players = game:GetService('Players')
-local LocalPlayer = Players.LocalPlayer
 
 -- Fling function (Infinite Yield style)
 local function flingPlayer(target, duration)
@@ -839,12 +821,6 @@ local function refreshPlayers()
     PlayerDropdown:SetValues(names)
 end
 
-PlayerDropdown = PlayerBox:AddDropdown('PlayerDropdown', {
-    Values = {},
-    Default = nil,
-    Multi = false,
-    Text = 'Select Player',
-    Callback = function(val)
         print('Selected player:', val)
     end,
 })
@@ -2434,6 +2410,7 @@ AutoBox:AddToggle('EnableQiZone', {
 })
 
 getgenv().Window = Window
+
 
 
 
